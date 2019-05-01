@@ -4,6 +4,7 @@ import RAKE
 import mysql.connector
 from mysql.connector import Error
 import json
+from heapq import nlargest
 
 from pdfminer.converter import TextConverter
 from pdfminer.pdfinterp import PDFPageInterpreter
@@ -44,6 +45,8 @@ def extract_text_by_page(pdf_path):
 
             text_in_list.append(fake_file_handle.getvalue())
 
+            # text = json.dumps(text)
+
             # print(text)
             # text_in_list = text.split(',')
             # print(text_in_list)
@@ -60,14 +63,22 @@ def extract_text_by_page(pdf_path):
             # with the given stopwords for a page which returns keywords and score
 
             final_text = r.run(text)
-            # print(final_text)
-            final_keywords = []
-            for a, b in final_text:
-                final_keywords.append(a)
+            # final_text.append(file_name)
+            # final_text.append(idx+1)
+            print(len(final_text))
+            final_dic = dict(final_text)
+            top_10 = nlargest(15, final_dic, key=final_dic.get)
+            print(json.dumps(top_10))
 
-            # final_keywords.append(idx+1)
-            # final_keywords.append(file_name)
-            #     print(final_keywords)
+            final_keywords = []
+            for a in final_text:
+                final_keywords.append(a)
+                # print(a)
+                # for x in final_keywords:
+                #     print(x)
+            # print(final_keywords)
+
+            # print(final_keywords)
 
             # for idx1, r1 in enumerate(final_keywords):
             #     # final_keywords = []
