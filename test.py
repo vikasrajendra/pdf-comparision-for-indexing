@@ -2,6 +2,7 @@ import io
 import os
 import RAKE
 import mysql.connector
+import PyPDF2
 from mysql.connector import Error
 import json
 from heapq import nlargest
@@ -40,14 +41,13 @@ def extract_text_by_page(pdf_path):
             converter = TextConverter(resource_manager, fake_file_handle)
             page_interpreter = PDFPageInterpreter(resource_manager, converter)
             page_interpreter.process_page(page)
-
             text = fake_file_handle.getvalue()
 
-            text_in_list.append(fake_file_handle.getvalue())
+            # text_in_list.append(fake_file_handle.getvalue())
 
             # text = json.dumps(text)
 
-            # print(text)
+            print(text)
             # text_in_list = text.split(',')
             # print(text_in_list)
             # print(len(text_in_list))
@@ -57,7 +57,8 @@ def extract_text_by_page(pdf_path):
             fake_file_handle.close()
 
             # using python-rake library to create a rake object with NLTK's stopwords
-            r = RAKE.Rake(RAKE.NLTKStopList())
+            r = RAKE.Rake(RAKE.RanksNLLongStopList())
+            max_key_extracted = 15
 
             # extracting keywords using NLTK and rake
             # with the given stopwords for a page which returns keywords and score
@@ -65,31 +66,17 @@ def extract_text_by_page(pdf_path):
             final_text = r.run(text)
             # final_text.append(file_name)
             # final_text.append(idx+1)
-            print(len(final_text))
-            final_dic = dict(final_text)
-            top_10 = nlargest(15, final_dic, key=final_dic.get)
-            print(json.dumps(top_10))
+            # print(len(final_text))
+            # print(final_text)
+            # final_dic = dict(final_text)
+            # top_10 = nlargest(15, final_dic, key=final_dic.get)
 
-            final_keywords = []
-            for a in final_text:
-                final_keywords.append(a)
-                # print(a)
-                # for x in final_keywords:
-                #     print(x)
-            # print(final_keywords)
+            sorted_result = sorted(final_text, key=lambda x: x[1], reverse=True)
+            sorted_result = sorted_result[:max_key_extracted]
 
-            # print(final_keywords)
-
-            # for idx1, r1 in enumerate(final_keywords):
-            #     # final_keywords = []
-            #     for r2 in r1:
-            #         final_keywords.append(r2[0])
-            #         print(final_keywords)
-
-
-        # print(keywords_score)
-
-            # print(final_keywords)
+            for keyword, score in sorted_result:
+                print(keyword)
+            exit(0)
 
 
 def main():
