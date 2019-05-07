@@ -26,12 +26,16 @@ def extract_text_by_page(pdf_path):
             db_info = connection.get_server_info()
             print("Connected to MySQL database... MySQL Server version on ", db_info)
             cursor = connection.cursor()
+            connection.autocommit = True
             cursor.execute("select database();")
             record = cursor.fetchone()
             print("Your connected to - ", record)
     except Error as e:
         print("Error while connecting to MySQL", e)
-    text_in_list = []
+
+    # connection.close()
+    # print("connection is closed")
+    # text_in_list = []
     with open(pdf_path, 'rb') as fh:
         for idx, page in enumerate(PDFPage.get_pages(fh,
                                                      caching=True,
@@ -47,7 +51,7 @@ def extract_text_by_page(pdf_path):
 
             # text = json.dumps(text)
 
-            print(text)
+            # print(text)
             # text_in_list = text.split(',')
             # print(text_in_list)
             # print(len(text_in_list))
@@ -73,10 +77,14 @@ def extract_text_by_page(pdf_path):
 
             sorted_result = sorted(final_text, key=lambda x: x[1], reverse=True)
             sorted_result = sorted_result[:max_key_extracted]
+            # print(sorted_result)
 
             for keyword, score in sorted_result:
                 print(keyword)
-            exit(0)
+                cursor.execute("INSERT INTO keyword_indices (KEYWORD, SLIDE_ID) VALUES (%s, %s)", (keyword, idx+1))
+            # exit(0)
+
+    connection.close()
 
 
 def main():
